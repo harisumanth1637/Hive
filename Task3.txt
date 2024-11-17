@@ -1,0 +1,64 @@
+// Part 1
+
+CREATE TABLE GameTableBuck (
+  marketplace STRING,
+  customer_id STRING,
+  review_id STRING,
+  product_id STRING,
+  product_parent STRING,
+  product_title STRING,
+  product_category STRING,
+  star_rating INT,
+  helpful_votes INT,
+  total_votes INT,
+  vine STRING,
+  verified_purchase STRING,
+  review_headline STRING,
+  review_body STRING,
+  review_date DATE
+)
+CLUSTERED BY (review_date) INTO 3 BUCKETS
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE;
+
+
+//SET hive.enforce.bucketing = true;
+
+INSERT INTO TABLE GameTableBuck
+SELECT *
+FROM GameTable;
+
+// Min and Max date for each bucket
+SELECT
+  bucket_number,
+  MIN(review_date) AS min_review_date,
+  MAX(review_date) AS max_review_date
+FROM (
+  SELECT 
+    review_date, 
+    Pmod(Hash(review_date), 3) AS bucket_number
+  FROM GameTableBuck
+) AS bucketed_data
+GROUP BY bucket_number
+ORDER BY bucket_number;
+
+
+//Output 
+0	1997-11-08	2015-08-30
+1	1997-11-06	2015-08-31
+2	1997-12-13	2015-08-29
+
+
+//Part 2
+SELECT
+  product_id,
+  AVG(helpful_votes) AS avg_helpful_votes,
+  AVG(total_votes) AS avg_total_votes
+FROM
+  GameTableBuck
+GROUP BY
+  product_id
+HAVING
+  AVG(helpful_votes) > 1;
