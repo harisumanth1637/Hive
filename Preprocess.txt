@@ -1,0 +1,128 @@
+
+CREATE TABLE Raw_data (
+  marketplace STRING,
+  customer_id STRING, 
+  review_id STRING,
+  product_id STRING, 
+  product_parent STRING, 
+  product_title STRING,
+  product_category STRING,
+  star_rating STRING,
+  helpful_votes STRING,
+  total_votes STRING,
+  vine STRING,
+  verified_purchase STRING,
+  review_headline STRING,
+  review_body STRING,
+  review_date STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE;
+
+//Loading Data 
+
+LOAD DATA LOCAL INPATH '/home/hthtd/Downloads/CS6304FS24_HW6_WorkWizards/amazon_reviews_us_Video_Games_v1_00.tsv' INTO TABLE Raw_data;
+
+//Count number of rows in Raw_data
+SELECT COUNT(*) AS raw_table_count FROM Raw_data; // 1785998 got this 
+
+// Drop Table Raw_data;
+
+CREATE TABLE Preprocess (
+  marketplace STRING,
+  customer_id STRING, 
+  review_id STRING,
+  product_id STRING, 
+  product_parent STRING, 
+  product_title STRING,
+  product_category STRING,
+  star_rating STRING,
+  helpful_votes STRING,
+  total_votes STRING,
+  vine STRING,
+  verified_purchase STRING,
+  review_headline STRING,
+  review_body STRING,
+  review_date STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE;
+
+// Preprocessing each column
+
+INSERT INTO Preprocess
+SELECT
+  CASE 
+    WHEN marketplace IS NOT NULL AND LENGTH(marketplace) > 0 THEN marketplace 
+    ELSE 'UNKNOWN' 
+  END AS marketplace,
+  CASE 
+    WHEN customer_id IS NOT NULL AND LENGTH(customer_id) > 0 THEN customer_id 
+    ELSE 'UNKNOWN' 
+  END AS customer_id,
+  CASE 
+    WHEN review_id IS NOT NULL AND LENGTH(review_id) > 0 THEN review_id 
+    ELSE 'UNKNOWN' 
+  END AS review_id,
+  CASE 
+    WHEN product_id IS NOT NULL AND LENGTH(product_id) > 0 THEN product_id 
+    ELSE 'UNKNOWN' 
+  END AS product_id,
+  CASE 
+    WHEN product_parent IS NOT NULL AND product_parent RLIKE '^[0-9]+$' THEN product_parent 
+    ELSE 'UNKNOWN' 
+  END AS product_parent,
+  CASE 
+    WHEN product_title IS NOT NULL AND LENGTH(product_title) > 0 THEN product_title 
+    ELSE 'No Title' 
+  END AS product_title,
+  CASE 
+    WHEN product_category IS NOT NULL AND LENGTH(product_category) > 0 THEN product_category 
+    ELSE 'Unknown Category' 
+  END AS product_category,
+  CASE 
+    WHEN star_rating IS NOT NULL AND star_rating RLIKE '^[0-9]+$' THEN star_rating 
+    ELSE 0 
+  END AS star_rating,
+  CASE 
+    WHEN helpful_votes IS NOT NULL AND helpful_votes RLIKE '^[0-9]+$' THEN helpful_votes 
+    ELSE 0 
+  END AS helpful_votes,
+  CASE 
+    WHEN total_votes IS NOT NULL AND total_votes RLIKE '^[0-9]+$' THEN total_votes
+    ELSE 0 
+  END AS total_votes,
+  CASE 
+    WHEN vine IN ('Y', 'N') THEN vine 
+    ELSE 'N' 
+  END AS vine,
+  CASE 
+    WHEN verified_purchase IN ('Y', 'N') THEN verified_purchase 
+    ELSE 'N' 
+  END AS verified_purchase,
+  CASE 
+    WHEN review_headline IS NOT NULL AND LENGTH(review_headline) > 0 THEN review_headline 
+    ELSE 'No Headline' 
+  END AS review_headline,
+  CASE 
+    WHEN review_body IS NOT NULL AND LENGTH(review_body) > 0 THEN review_body 
+    ELSE 'No Content' 
+  END AS review_body,
+  CASE 
+    WHEN review_date IS NOT NULL AND review_date RLIKE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN review_date
+    ELSE NULL 
+  END AS review_date
+FROM Raw_data
+WHERE marketplace != 'marketplace';
+
+// Count of preprocess table - 1785997
+SELECT COUNT(*) AS preprocess_table_count FROM Preprocess;
+
+//Drop Table Preprocess;
+
+
+
