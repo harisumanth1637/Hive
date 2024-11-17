@@ -54,7 +54,7 @@ SELECT
 FROM
   GameTable
 WHERE
-  marketplace = 'US'
+  marketplace != 'US'
 GROUP BY
   marketplace,
   product_category;
