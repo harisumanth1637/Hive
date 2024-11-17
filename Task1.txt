@@ -1,0 +1,67 @@
+//Part 1
+CREATE TABLE GameTable (
+  marketplace STRING,
+  customer_id STRING,
+  review_id STRING,
+  product_id STRING,
+  product_parent STRING,
+  product_title STRING,
+  product_category STRING,
+  star_rating INT,
+  helpful_votes INT,
+  total_votes INT,
+  vine STRING,
+  verified_purchase STRING,
+  review_headline STRING,
+  review_body STRING,
+  review_date DATE
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE;
+
+//Loading data from preprocess table
+INSERT INTO GameTable
+SELECT
+  marketplace,
+  customer_id,
+  review_id,
+  product_id,
+  product_parent, 
+  product_title,
+  product_category,
+  CAST(star_rating AS INT) AS star_rating, -
+  CAST(helpful_votes AS INT) AS helpful_votes, 
+  CAST(total_votes AS INT) AS total_votes, 
+  vine,
+  verified_purchase,
+  review_headline,
+  review_body,
+  CAST(review_date AS DATE) AS review_date 
+FROM Preprocess;
+
+
+
+
+//Part 2 -
+
+SELECT
+  marketplace,
+  product_category,
+  COUNT(review_id) AS total_reviews,
+  AVG(star_rating) AS avg_star_rating
+FROM
+  GameTable
+WHERE
+  marketplace = 'US'
+GROUP BY
+  marketplace,
+  product_category;
+
+  
+// Zero values with != US
+// US	Video Games	1785997	4.059892597803915 with marketplace = 'US'
+
+  
+  
